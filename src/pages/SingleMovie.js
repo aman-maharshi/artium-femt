@@ -4,7 +4,6 @@ import Header from "../components/Header"
 
 function SingleMovie() {
     let { movieId } = useParams()
-
     const [movie, setMovie] = useState(null)
     const [loading, setLoading] = useState(false)
 
@@ -35,11 +34,11 @@ function SingleMovie() {
                     <div className="font-bold text-xl">Loading...</div>
                 ) : (
                     <div className="p-4 flex flex-col gap-4">
-                        <div className="h-1/3 w-80 mx-auto">
+                        <div className="sm:h-1/3 h-80 w-80 mx-auto">
                             <img
                                 src={movie?.Poster}
                                 alt={movie?.Title}
-                                className="h-full w-full object-cover"
+                                className="h-full w-full object-cover object-top"
                             />
                         </div>
 
