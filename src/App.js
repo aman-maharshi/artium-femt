@@ -1,14 +1,17 @@
-function App() {
-    console.log(process.env.REACT_APP_API_ID)
+import { BrowserRouter, Routes, Route } from "react-router-dom"
 
+import Home from "./pages/Home"
+import SingleMovie from "./pages/SingleMovie"
+
+function App() {
     return (
         <div>
-            <h1 className="text-3xl font-bold underline">Hello world!</h1>
-            <p>
-                Lorem ipsum dolor sit, amet consectetur adipisicing elit. Harum
-                culpa nostrum pariatur et a dicta tenetur aspernatur dolore
-                excepturi rerum?
-            </p>
+            <BrowserRouter>
+                <Routes>
+                    <Route index element={<Home />} />
+                    <Route path="/movie/:movieId" element={<SingleMovie />} />
+                </Routes>
+            </BrowserRouter>
         </div>
     )
 }
