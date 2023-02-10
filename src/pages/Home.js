@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 
+import useDebounce from "../hooks/useDebounce"
 import Header from "../components/Header"
 
 function Home() {
@@ -9,16 +10,26 @@ function Home() {
     const [error, setError] = useState(false)
     const [errorMessage, setErrorMessage] = useState("")
 
+    const [searchInput, setSearchInput] = useState("")
+
+    const debouncedSearchValue = useDebounce(searchInput, 700)
+
     useEffect(() => {
         getListingData()
     }, [])
 
+    useEffect(() => {
+        if (debouncedSearchValue.length > 0) {
+            getSearchResults(debouncedSearchValue)
+        } else {
+            getListingData()
+        }
+    }, [debouncedSearchValue])
+
     async function getListingData() {
         setLoading(true)
         try {
-            const response = await fetch(
-                `https://www.omdbapi.com/?apikey=${process.env.REACT_APP_API_ID}&s=marvel`
-            )
+            const response = await fetch(`https://www.omdbapi.com/?apikey=${process.env.REACT_APP_API_ID}&s=marvel`)
             const data = await response.json()
             setMovies(data.Search)
             setError(false)
@@ -28,21 +39,10 @@ function Home() {
         setLoading(false)
     }
 
-    function handleSearch(e) {
-        const searchInput = e.target.value.toLowerCase()
-        if (searchInput.length > 0) {
-            getSearchResults(searchInput)
-        } else {
-            getListingData()
-        }
-    }
-
     async function getSearchResults(query) {
         setLoading(true)
         try {
-            const response = await fetch(
-                `https://www.omdbapi.com/?apikey=${process.env.REACT_APP_API_ID}&s=${query}`
-            )
+            const response = await fetch(`https://www.omdbapi.com/?apikey=${process.env.REACT_APP_API_ID}&s=${query}`)
             const data = await response.json()
 
             if (data.Response === "False") {
@@ -63,12 +63,7 @@ function Home() {
         <>
             <Header />
             <div className="p-4 md:w-8/12 m-auto">
-                <input
-                    type="text"
-                    placeholder="Search..."
-                    className="p-4 rounded-md w-full text-lg text-black"
-                    onChange={handleSearch}
-                />
+                <input type="text" placeholder="Search..." className="p-4 rounded-md w-full text-lg text-black" onChange={e => setSearchInput(e.target.value.toLowerCase())} />
             </div>
             <div className="p-4 md:w-8/12 m-auto grid lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-2 gap-4">
                 {loading ? (
@@ -77,27 +72,15 @@ function Home() {
                     movies.map((item, index) => {
                         const { Poster, Title, Year, imdbID } = item
                         return (
-                            <Link
-                                to={`/movie/${imdbID}`}
-                                key={index}
-                                className="p-4 rounded-md bg-gray-800"
-                            >
-                                <img
-                                    src={Poster}
-                                    alt={Title}
-                                    className="h-64 w-full rounded-md object-cover object-top"
-                                />
+                            <Link to={`/movie/${imdbID}`} key={index} className="p-4 rounded-md bg-gray-800">
+                                <img src={Poster} alt={Title} className="h-64 w-full rounded-md object-cover object-top" />
                                 <h3 className="font-bold my-4">{Title}</h3>
                             </Link>
                         )
                     })
                 )}
             </div>
-            {error && !loading && (
-                <p className="font-bold text-lg my-4 text-center text-red-400">
-                    {errorMessage}
-                </p>
-            )}
+            {error && !loading && <p className="font-bold text-lg my-4 text-center text-red-400">{errorMessage}</p>}
         </>
     )
 }
